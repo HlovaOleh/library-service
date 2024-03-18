@@ -27,4 +27,6 @@ urlpatterns = [
     ),
     path("api/users/",
          include("customer.urls", namespace="customer")),
+    path("api/payments/",
+         include("payment.urls", namespace="payment"))
 ]
