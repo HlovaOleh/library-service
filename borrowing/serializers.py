@@ -3,6 +3,7 @@ from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
 from borrowing.models import Borrowing
+from payment.services import get_payment
 
 
 class BorrowingSerializer(serializers.ModelSerializer):
@@ -34,6 +35,8 @@ class BorrowingCreateSerializer(serializers.ModelSerializer):
             raise ValidationError("You must return your active borrowing!")
         borrowed_book.inventory -= 1
         borrowed_book.save()
-        return Borrowing.objects.create(
+        borrowing = Borrowing.objects.create(
             **validated_data
         )
+        get_payment(borrowing)
+        return borrowing
