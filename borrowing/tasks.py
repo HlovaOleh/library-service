@@ -9,8 +9,6 @@ from borrowing.models import Borrowing
 logger = get_task_logger(__name__)
 
 
-@shared_task(name="check_overdue_task")
+@shared_task(bind=True)
 def check_overdue_task(self):
-    borrowings = Borrowing.objects.filter(
-        expected_return_date__lte=timezone.now()+timezone.timedelta(days=1)
-    )
+    print("Doing stuff")
