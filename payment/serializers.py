@@ -1,10 +1,9 @@
-from rest_framework.serializers import ModelSerializer
+from rest_framework import serializers
 
-from borrowing.serializers import BorrowingSerializer
 from payment.models import Payment
 
 
-class PaymentSerializer(ModelSerializer):
+class PaymentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Payment
@@ -12,13 +11,17 @@ class PaymentSerializer(ModelSerializer):
 
 
 class PaymentListSerializer(PaymentSerializer):
-    borrowing = BorrowingSerializer()
+    borrowing = serializers.StringRelatedField(
+        many=False, read_only=True
+    )
 
     class Meta:
         model = Payment
         fields = (
+            "id",
             "borrowing",
             "money_to_be_paid",
             "payment_type",
+            "status",
             "money_to_be_paid"
         )
