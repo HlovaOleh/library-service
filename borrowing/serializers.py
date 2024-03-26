@@ -3,7 +3,10 @@ from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
 from borrowing.models import Borrowing
-from payment.serializers import PaymentSerializer, PaymentListSerializer
+from payment.serializers import (
+    PaymentSerializer,
+    PaymentListSerializer
+)
 from payment.services import get_payment
 
 

@@ -55,7 +55,7 @@ def get_checkout_session(borrowing: Borrowing, payment_id: int) -> Session:
     )
 
 
-def get_payment(borrowing: Borrowing) -> Payment|None:
+def get_payment(borrowing: Borrowing) -> Payment | None:
     """Create payment instance for borrowing"""
     payment_type = Payment.PaymentTypes.PAYMENT
 
