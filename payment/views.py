@@ -10,6 +10,7 @@ from payment.serializers import (
 )
 
 from payment.models import Payment
+from payment.services import get_checkout_session
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
@@ -32,6 +33,17 @@ class PaymentViewSet(viewsets.ModelViewSet):
     @action(methods=["GET"], url_path="success", detail=True)
     def payment_successful(self, request, pk: None):
         payment = self.get_object()
+        session = stripe.checkout.Session.retrieve(payment.session_id)
+        status = session.get("payment_intent", {}).get("status")
+
+        if status != "succeeded":
+            return Response(
+                {"status": "fail",
+                 "message": "Payment failed, please complete payment "
+                            "within 24 hours from book borrowing time!"},
+                status=400,
+            )
+
         payment.status = "paid"
         payment.save()
         return Response(
@@ -45,6 +57,21 @@ class PaymentViewSet(viewsets.ModelViewSet):
     @action(methods=["GET"], url_path="cancel", detail=True)
     def payment_canceled(self, request, pk: None):
         return Response(
-            {"status": "fail", "message": "Payment was canceled"},
+            {
+                "status": "fail",
+                "message": "Payment was canceled. Please complete payment "
+                "within 24 hours from book borrowing time!"
+             },
             status=400,
         )
+
+    @action(methods=["POST"], url_path="renew-session", detail=True)
+    def renew_checkout(self, request, pk: None):
+        payment = self.get_object()
+        new_session = get_checkout_session(payment.borrowing, payment.id)
+
+        if new_session.status != "open":
+            raise stripe.error.StripeError
+
+        payment.session_id = new_session.id
+        payment.url = new_session.url
