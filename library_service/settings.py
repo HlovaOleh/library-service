@@ -158,3 +158,6 @@ STRIPE_PUBLISHABLE_KEY = os.environ.get("STRIPE_PUBLISHABLE_KEY")
 # Celery
 CELERY_BROKER_URL = os.environ["RABBIT_URL"]
 CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
+
+
+DOMAIN = os.environ["DOMAIN"]
