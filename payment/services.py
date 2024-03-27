@@ -37,7 +37,7 @@ def get_checkout_session(borrowing: Borrowing, payment_id: int) -> Session:
     success_url = reverse("payment:success", args=[payment_id])
     cancel_url = reverse("payment:cancel", args=[payment_id])
     stripe.api_key = settings.STRIPE_SECRET_KEY
-    return stripe.checkout.Session.create(
+    return Session.create(
         payment_method_types=["card"],
         line_items=[
             {
@@ -52,8 +52,8 @@ def get_checkout_session(borrowing: Borrowing, payment_id: int) -> Session:
             },
         ],
         mode="payment",
-        success_url=success_url,
-        cancel_url=cancel_url,
+        success_url=settings.DOMAIN + success_url,
+        cancel_url=settings.DOMAIN + cancel_url,
     )
 
 
