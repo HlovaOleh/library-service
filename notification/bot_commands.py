@@ -1,14 +1,28 @@
+from borrowing.models import Borrowing
+from customer.models import Customer
+from notification.models import TelegramUser
+
+
+def is_user(message):
+    user_email = message.text
+    if Customer.objects.filter(email=user_email).exists():
+        user = Customer.objects.get(email=user_email)
+        try:
+            TelegramUser.objects.get(user_id=user)
+        except TelegramUser.DoesNotExist:
+            TelegramUser.objects.create(user_id=user, chat_id=message.chat.id)
+        return True
+    return False
+
+
+def is_admin(message):
+    pass
+
+
 def welcome_message(bot, message) -> None:
-    name = ""
-
-    if message.from_user.last_name is None:
-        name = f"{message.from_user.first_name}"
-    else:
-        name = f"{message.from_user.full_name}"
-
     bot.reply_to(message,
-                 f"Hello, {name}!\n"
-                 f"Welcome to the Library Service!\n\n"
+                 f"Hello, {message.from_user.full_name}!\n"
+                 f"Welcome to the Library Service!\n"
                  f"/help for more information")
 
 
@@ -17,3 +31,18 @@ def help_information(bot, message) -> None:
                  "/start - start bot\n"
                  "/help - show information about commands\n"
                  "/my_borrowings - show all your borrowings\n")
+
+
+def user_borrowings(bot, message) -> None:
+    borrowings_info_queryset = Borrowing.objects.filter(
+        user__customer__chat_id=message.chat.id,
+        is_active=True
+    )
+    borrowings_info = "Your borrowings:\n\n" + "\n".join([
+        f"-Book:  {borrowing.book}\n"
+        f"--Borrow date:  {borrowing.borrow_date}\n"
+        f"--Expected return date:  {borrowing.expected_return_date}\n"
+        for borrowing in borrowings_info_queryset
+    ])
+
+    bot.reply_to(message, borrowings_info)

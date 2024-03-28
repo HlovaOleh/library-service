@@ -2,7 +2,12 @@ import telebot
 from django.core.management import BaseCommand
 
 from library_service.settings import CHAT_ID, TELEGRAM_BOT_TOKEN
-from notification.bot_commands import welcome_message, help_information
+from notification.bot_commands import (
+    welcome_message,
+    help_information,
+    is_user,
+    user_borrowings
+)
 
 
 class Command(BaseCommand):
@@ -13,16 +18,24 @@ class Command(BaseCommand):
             bot.polling()
 
         @bot.message_handler(commands=["start"])
-        def send_welcome(message) -> None:
+        def login(message):
+            if not is_user(message):
+                bot.send_message(message.chat.id,
+                                 text="Enter your email to login: ")
+                bot.register_next_step_handler(message, login)
+            else:
+                authorised(message)
+
+        def authorised(message):
             welcome_message(bot, message)
 
         @bot.message_handler(commands=["help"])
         def send_help_information(message: telebot.types.Message) -> None:
             help_information(bot, message)
 
-        # @bot.message_handler(commands=["my_borrowings"])
-        # def send_users_borrowings(message: telebot.types.Message) -> None:
-        #     async_task(user_borrowings, bot, message)
+        @bot.message_handler(commands=["my_borrowings"])
+        def send_users_borrowings(message: telebot.types.Message) -> None:
+            user_borrowings(bot, message)
 
         def send_telegram_notification(message):
             bot.send_message(CHAT_ID, text=message)
