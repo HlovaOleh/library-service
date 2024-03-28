@@ -46,11 +46,12 @@ INSTALLED_APPS = [
     "rest_framework_simplejwt",
     "django_celery_results",
     "django_celery_beat",
-    "drf_spectacular"
+    "drf_spectacular",
     "borrowing",
     "book",
     "customer",
     "payment",
+    "notification",
 ]
 
 MIDDLEWARE = [
@@ -170,3 +171,7 @@ CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
 
 
 DOMAIN = os.environ["DOMAIN"]
+
+TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
+CHAT_ID = os.getenv("CHAT_ID")
+CHAT_URL = os.getenv("CHAT_URL")

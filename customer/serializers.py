@@ -1,8 +1,11 @@
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
 
+from library_service.settings import CHAT_ID
+
 
 class CustomerSerializer(serializers.ModelSerializer):
+    notifications_chat = serializers.URLField(default=CHAT_ID, read_only=True)
 
     class Meta:
         model = get_user_model()
