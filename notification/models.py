@@ -9,5 +9,4 @@ class TelegramUser(models.Model):
         on_delete=models.CASCADE,
         related_name="customer"
     )
-    chat_id = models.IntegerField()
-    chat_url = models.URLField()
+    chat_id = models.IntegerField(unique=True)
