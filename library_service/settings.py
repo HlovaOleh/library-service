@@ -46,7 +46,7 @@ INSTALLED_APPS = [
     "rest_framework_simplejwt",
     "django_celery_results",
     "django_celery_beat",
-    "drf_spectacular"
+    "drf_spectacular",
     "borrowing",
     "book",
     "customer",
