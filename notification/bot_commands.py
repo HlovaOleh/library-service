@@ -1,12 +1,13 @@
+from django.contrib.auth import get_user_model
+
 from borrowing.models import Borrowing
-from customer.models import Customer
 from notification.models import TelegramUser
 
 
 def is_user(message):
     user_email = message.text
-    if Customer.objects.filter(email=user_email).exists():
-        user = Customer.objects.get(email=user_email)
+    if get_user_model().objects.filter(email=user_email).exists():
+        user = get_user_model().objects.get(email=user_email)
         try:
             TelegramUser.objects.get(user_id=user)
         except TelegramUser.DoesNotExist:
