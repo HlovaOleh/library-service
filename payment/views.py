@@ -19,18 +19,20 @@ stripe.api_key = settings.STRIPE_SECRET_KEY
 
 
 class PaymentViewSet(viewsets.ModelViewSet):
-    queryset = Payment.objects.select_related(
-        "borrowing",
-        "borrowing__book",
-        "borrowing__user"
-    )
+    queryset = Payment.objects.all()
     permission_classes = (IsAuthenticated,)
 
     def get_queryset(self):
+        queryset = self.queryset.select_related(
+            "borrowing",
+            "borrowing__book",
+            "borrowing__user"
+        )
+
         if (not self.request.user.is_staff
                 or not self.request.user.is_superuser):
             return self.queryset.filter(borrowing__user=self.request.user)
-        return self.queryset
+        return queryset
 
     def get_serializer_class(self):
         if self.action == "list":
@@ -42,9 +44,9 @@ class PaymentViewSet(viewsets.ModelViewSet):
         """Endpoint for redirection after successful payment"""
         payment = self.get_object()
         session = stripe.checkout.Session.retrieve(payment.session_id)
-        status = session.get("payment_intent", {}).get("status")
+        status = session.status
 
-        if status != "succeeded":
+        if status != "complete":
             return Response(
                 {"status": "fail",
                  "message": "Payment failed, please complete payment "
@@ -52,7 +54,7 @@ class PaymentViewSet(viewsets.ModelViewSet):
                 status=400,
             )
 
-        payment.status = "paid"
+        payment.status = payment.PaymentStatus.PAID
         payment.save()
 
         successful_payment_notification(payment)
