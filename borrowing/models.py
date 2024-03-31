@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.models import QuerySet
 from django.utils import timezone
 
 from book.models import Book
@@ -10,6 +11,11 @@ BORROW_TERM = timezone.timedelta(days=14)
 
 def set_expected_return_date():
     return (timezone.now() + BORROW_TERM).date()
+
+
+class BorrowingManager(models.Manager):
+    def get_queryset(self) -> QuerySet:
+        return super().get_queryset().select_related("book", "user")
 
 
 class Borrowing(models.Model):
@@ -27,6 +33,8 @@ class Borrowing(models.Model):
         related_name="borrowings"
     )
     is_active = models.BooleanField(default=True)
+
+    objects = BorrowingManager()
 
     class Meta:
         ordering = ["-is_active", "-borrow_date"]
