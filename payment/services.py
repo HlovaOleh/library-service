@@ -6,7 +6,10 @@ from stripe.checkout import Session
 from django.urls import reverse
 from borrowing.models import Borrowing
 from library_service import settings
-from notification.management.commands import run_telegram_bot
+from notification.management.commands.run_telegram_bot import (
+    send_notification
+)
+from notification.models import TelegramUser
 from payment.models import Payment
 
 
@@ -95,4 +98,12 @@ def successful_payment_notification(payment: Payment) -> None:
     message = (f"Your payment of {amount_total} dollars "
                f"for {book_name} was successful.")
 
-    run_telegram_bot.send_notification(user.id, message)
+    try:
+        send_notification(
+            TelegramUser.objects.get(user_id=user.id).chat_id,
+            message
+        )
+    except TelegramUser.DoesNotExist:
+        pass
+    except Exception as e:
+        print(str(e))

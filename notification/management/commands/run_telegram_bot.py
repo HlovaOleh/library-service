@@ -7,7 +7,6 @@ from notification.bot_commands import (
     help_information,
     is_user,
     user_borrowings,
-    send_payment_notification
 )
 
 bot = telebot.TeleBot(TELEGRAM_BOT_TOKEN)
@@ -36,8 +35,8 @@ def send_users_borrowings(message: telebot.types.Message) -> None:
     user_borrowings(bot, message)
 
 
-def send_notification(user_id, message):
-    send_payment_notification(bot, user_id, message)
+def send_notification(chat_id, message):
+    bot.send_message(chat_id, message)
 
 
 class Command(BaseCommand):
