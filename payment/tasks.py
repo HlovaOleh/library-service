@@ -7,9 +7,10 @@ from payment.models import Payment
 def check_if_session_expired(session_id: str) -> bool:
     """Check is session status is expired"""
     session = stripe.checkout.Session.retrieve(session_id)
-    status = session.get("payment_intent", {}).get("status")
-    if status == "expired":
-        return True
+    if session:
+        status = session.status
+        if status == "expired":
+            return True
     return False
 
 
