@@ -1,9 +1,10 @@
 import stripe
 from django.conf import settings
-from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.decorators import action
 from rest_framework import viewsets
+
+from book.permissions import IsAdminOrReadOnly
 from payment.serializers import (
     PaymentListSerializer,
     PaymentSerializer
@@ -20,7 +21,7 @@ stripe.api_key = settings.STRIPE_SECRET_KEY
 
 class PaymentViewSet(viewsets.ModelViewSet):
     queryset = Payment.objects.all()
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAdminOrReadOnly,)
 
     def get_queryset(self):
         queryset = self.queryset.select_related(
