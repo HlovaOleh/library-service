@@ -20,9 +20,7 @@ class Book(models.Model):
 
     @property
     def available(self) -> bool:
-        if self.inventory:
-            return True
-        return False
+        return bool(self.inventory)
 
     class Meta:
         unique_together = ("title", "author", "cover")

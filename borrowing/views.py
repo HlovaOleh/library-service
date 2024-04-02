@@ -37,7 +37,7 @@ class BorrowingViewSet(
 
         if is_active == "True":
             queryset = queryset.filter(is_active=True)
-        elif is_active == "False":
+        else:
             queryset = queryset.filter(is_active=False)
         return queryset
 
