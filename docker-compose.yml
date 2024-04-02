@@ -31,7 +31,7 @@ services:
     build:
       context: .
     command: >
-      sh -c "celery -A core.celery worker -l info"
+      sh -c "celery -A library_service.celery worker -l info"
     volumes:
       - .:/app
     env_file:
@@ -44,7 +44,7 @@ services:
     build:
         context: .
     command: >
-      sh -c "celery -A core.celery beat -l info --pidfile=/tmp/core.pid"
+      sh -c "celery -A library_service.celery beat -l info --pidfile=/tmp/core.pid"
     volumes:
       - .:/app
     depends_on:

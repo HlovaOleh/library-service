@@ -9,7 +9,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from book.models import Book
 from book.serializers import BookListSerializer, BookSerializer
 
-BOOK_URL = reverse("book_service:book-list")
+BOOK_URL = reverse("book:book-list")
 
 
 class UnauthenticatedApiTests(TestCase):
@@ -142,7 +142,7 @@ class AdminApiTests(TestCase):
 
         response = self.client.patch(
             reverse(
-                "book_service:book-detail",
+                "book:book-detail",
                 args=[self.book.id]),
             payload)
 
@@ -156,7 +156,7 @@ class AdminApiTests(TestCase):
 
     def test_book_delete_as_admin(self):
         response = self.client.delete(reverse(
-            "book_service:book-detail",
+            "book:book-detail",
             args=[self.book.id]
         ))
 

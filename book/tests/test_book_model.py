@@ -44,8 +44,8 @@ class BookModelTest(TestCase):
             )
             self.assertEqual(
                 str(error.exception),
-                "UNIQUE constraint failed: book_service_book.title, "
-                "book_service_book.author, book_service_book.cover"
+                "UNIQUE constraint failed: book.title, "
+                "book.author, book.cover"
             )
 
     def test_book_ordering(self):
