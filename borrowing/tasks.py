@@ -3,7 +3,6 @@ from __future__ import absolute_import, unicode_literals
 from celery import shared_task
 from celery.utils.log import get_task_logger
 from django.contrib.auth import get_user_model
-from django.core.exceptions import ObjectDoesNotExist
 from django.utils import timezone
 
 from borrowing.models import Borrowing
@@ -22,12 +21,13 @@ def check_overdue_task(self):
         expected_return_date__lte=timezone.now() + timezone.timedelta(days=1),
         is_active=True
     )
-    users = [borrowing.user for borrowing in borrowings.all()]
+    users = set(borrowing.user.pk for borrowing in borrowings)
+
     for borrowing in borrowings:
-        try:
-            telegram_user = TelegramUser.objects.get(
-                user_id=borrowing.user.pk
-            ).chat_id
+        telegram_user = TelegramUser.objects.filter(
+            user_id=borrowing.user.pk
+        ).first()
+        if telegram_user:
             borrowing_info = (
                 "You have overdue borrowing:\n\n"
                 f"-Book: {borrowing.book}\n"
@@ -39,18 +39,17 @@ def check_overdue_task(self):
                 telegram_user,
                 borrowing_info
             )
-        except ObjectDoesNotExist:
-            pass
-    for user in get_user_model().objects.all():
-        if user not in users:
-            try:
-                telegram_user = TelegramUser.objects.get(
-                    user_id=user.pk
-                ).chat_id,
-                send_notification(
-                    telegram_user,
-                    "No borrowings overdue today!"
-                )
-            except ObjectDoesNotExist:
-                pass
+
+    all_users = set(get_user_model().objects.values_list("pk", flat=True))
+    users_with_borrowings = users.union(all_users)
+
+    for user_id in all_users - users:
+        telegram_user = TelegramUser.objects.filter(
+            user_id=user_id
+        ).first()
+        if telegram_user:
+            send_notification(
+                telegram_user.chat_id,
+                "No borrowings overdue today!"
+            )
     return "Done sending notifications!"
