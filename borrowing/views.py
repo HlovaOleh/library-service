@@ -1,8 +1,8 @@
 from django.db import transaction
 from django.utils import timezone
 from drf_spectacular.utils import extend_schema, OpenApiParameter
-from rest_framework import viewsets, mixins
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework import viewsets, mixins, status
+from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
@@ -59,7 +59,7 @@ class BorrowingViewSet(
         parameters=[
             OpenApiParameter(
                 name="is_active",
-                type={"type": "string", "items": {"type": "string"}},
+                type=bool,
                 description="Filter by borrowing status (ex. ?is_active=True)"
             )
         ]
@@ -67,15 +67,12 @@ class BorrowingViewSet(
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
 
+    @action(detail=True, methods=["POST"])
+    @transaction.atomic
+    def return_book(self, request, pk=None):
+        """Endpoint for returning book"""
+        borrowing = self.get_object()
 
-@api_view(["POST"])
-@permission_classes([IsAuthenticated])
-@transaction.atomic
-def borrowing_return(request, pk):
-    """Endpoint for returning book"""
-    borrowing = Borrowing.objects.get(pk=pk)
-
-    if request.method == "POST":
         if borrowing.is_active:
             borrowing.is_active = False
             borrowing.actual_return_date = timezone.now().date()
@@ -87,10 +84,10 @@ def borrowing_return(request, pk):
             return Response(
                 {"status": "success", "message":
                     "Thank you! The book is returned "},
-                status=200
+                status=status.HTTP_200_OK
             )
 
         return Response(
             {"status": "fail", "message": "Book is already returned"},
-            status=400
+            status=status.HTTP_400_BAD_REQUEST
         )
